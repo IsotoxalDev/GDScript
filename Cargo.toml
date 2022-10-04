@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "gdscript_parser",
+  "gdscript_ast",
+  "gdscript_codegen"
+]
