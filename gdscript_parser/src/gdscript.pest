@@ -1,1 +1,54 @@
-file = { (ASCII_DIGIT | "." | "-")+ }
+/*
+This file hoists the grammer for gdscript.
+*/
+file = {
+    SOI
+    ~ class_name? ~ inheritance? ~ newline?
+    ~ EOI
+}
+
+inheritance = {
+    extends_keyword
+    ~ (identifier | string)
+    ~ (dot ~ identifier)*
+}
+
+class_name = {
+    class_name_keyword
+    ~ identifier
+    ~ (coma ~ string)?
+}
+
+// Data Types
+string = @{ multi_line_string | single_line_string }
+single_line_string = {
+    PUSH(single_quotes | double_quotes)
+    ~ (!(single_quotes | double_quotes) ~ !newline ~ ANY)*
+    ~ POP
+}
+multi_line_string = {
+    PUSH(triple_quotes)
+    ~ (!triple_quotes ~ ANY)*
+    ~POP
+}
+
+// Keywords
+extends_keyword = { "extends" }
+class_name_keyword = { "class_name" }
+
+// Utility
+single_quotes = { "'" }
+double_quotes = { "\"" }
+triple_quotes = { "\"\"\"" }
+
+newline = { "\n" }
+
+dot = { "." }
+coma = { "," }
+
+WHITESPACE = { WHITE_SPACE+ }
+
+identifier = @{
+    (ASCII_ALPHA | "_")
+    ~ (ASCII_ALPHANUMERIC | "_")*
+}
