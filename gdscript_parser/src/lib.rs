@@ -9,6 +9,6 @@ use pest::Parser;
 pub struct GDScriptPestParser;
 
 pub fn parse(what: &str) {
-    let out = GDScriptPestParser::parse(Rule::file, what);
-    println!("{:?}", out);
+    let out = GDScriptPestParser::parse(Rule::file, what).unwrap();
+    println!("{:#?}", out);
 }

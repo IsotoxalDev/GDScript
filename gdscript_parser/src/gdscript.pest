@@ -3,21 +3,32 @@ This file hoists the grammer for gdscript.
 */
 file = {
     SOI
-    ~ class_name? ~ inheritance? ~ newline?
+    ~ class_inheritance? ~ newline?
+    // ~ top_level_declaration
     ~ EOI
 }
 
+class_inheritance = _{
+    (class_name ~ (newline | whitespace)? ~ inheritance)
+    | (inheritance ~ newline ~ class_name)
+    | inheritance
+}
+
 inheritance = {
-    extends_keyword
+    extends_keyword ~ whitespace
     ~ (identifier | string)
     ~ (dot ~ identifier)*
 }
 
 class_name = {
-    class_name_keyword
+    class_name_keyword ~ whitespace
     ~ identifier
     ~ (coma ~ string)?
 }
+
+// top_level_declaration = {
+//     class_var_declarations
+// }
 
 // Data Types
 string = @{ multi_line_string | single_line_string }
@@ -33,22 +44,27 @@ multi_line_string = {
 }
 
 // Keywords
-extends_keyword = { "extends" }
-class_name_keyword = { "class_name" }
+extends_keyword = _{ "extends" }
+class_name_keyword = _{ "class_name" }
 
 // Utility
-single_quotes = { "'" }
-double_quotes = { "\"" }
-triple_quotes = { "\"\"\"" }
+single_quotes = _{ "'" }
+double_quotes = _{ "\"" }
+triple_quotes = _{ "\"\"\"" }
 
-newline = { "\n" }
+space = _{ " " }
+tab = _{ "\t" }
 
-dot = { "." }
-coma = { "," }
+hash = _{ "#" }
 
-WHITESPACE = { WHITE_SPACE+ }
+dot = _{ "." }
+coma = _{ "," }
 
 identifier = @{
     (ASCII_ALPHA | "_")
     ~ (ASCII_ALPHANUMERIC | "_")*
 }
+
+newline = _{ "\n" }
+whitespace = _{ ( space | tab )+ }
+COMMENT = { hash ~ !ANY+ ~ newline }
