@@ -1,37 +1,162 @@
 /*
-This file hoists the grammer for gdscript.
+    This file hoists grammer for gdscript.
+    Note: This grammer is of gdscript 2
 */
-file = {
-    SOI
-    ~ class_inheritance? ~ newline?
-    // ~ top_level_declaration
-    ~ EOI
+
+// Expressions
+expressions = {}
+
+binary_expressions = {
+    expression_part
+    ~ ( binary_operator ~ expression_part )*
 }
 
-class_inheritance = _{
-    (class_name ~ (newline | whitespace)? ~ inheritance)
-    | (inheritance ~ newline ~ class_name)
-    | inheritance
+unary_expressions = {
+    unary_operator
+    ~ expression_part
 }
 
-inheritance = {
-    extends_keyword ~ whitespace
-    ~ (identifier | string)
-    ~ (dot ~ identifier)*
+terenary_expression = {
+    expression_part ~ if_keyword
+    ~ expression ~ else_keyword
+    ~ expression_part
 }
 
-class_name = {
-    class_name_keyword ~ whitespace
-    ~ identifier
-    ~ (coma ~ string)?
+function_call = {
+    identifier
+    ~ paren_open
+        ~ function_call_argument?
+    ~ paren_close
 }
 
-// top_level_declaration = {
-//     class_var_declarations
-// }
+function_call_argument = {
+    expresssion_part
+    ~ (coma ~ expression_part)*
+}
 
-// Data Types
+// Operators
+subscription = {
+    square_bracket_open ~ ASCII_DIGIT+
+    ~ square_bracket_close
+}
+attribute = {
+    dot ~ identifier
+    ~ attribute_operator*
+}
+
+binary_operator = {
+    bit_shift_left
+    | bit_shift_right | bitwise_and
+    | bitwise_xor | bitwise_or
+    | exponential | multiplication
+    | division | modulo
+    | addition | subtraction
+    | greater_than | lesser_than
+    | greater_than_or_equal
+    | lesser_than_or_equal
+    | equality | inequalit
+    | boolean_not | boolean_and
+    | boolean_or
+}
+
+unary operator = {
+    subtraction
+}
+
+bit_shift_left = { "<<" }
+bit_shift_right = { ">>" }
+bitwise_not = { "~" }
+bitwise_and = { "&" }
+bitwise_xor = { "&" }
+bitwise_or = { "|" }
+
+exponential = { "**" }
+multiplication = { "*" }
+division = { "/" }
+modulo = { "%" }
+addition = { "+" }
+subtraction = { "-" }
+
+greater_than = { ">" }
+lesser_than = { "<" }
+greater_than_or_equal = { ">" }
+lesser_than_or_equal = { "<" }
+equality = { "==" }
+inequality = { "!=" }
+
+boolean_not = { "!" }
+boolean_and = { "&&" }
+boolean_or = { "||" }
+
+assignment = { "=" }
+add_assignment = { "+=" }
+sub_assignment = { "-=" }
+mul_assignment = { "*=" }
+div_assignment = { "/=" }
+mod_assignment = { "%=" }
+exp_assignment = { "**=" }
+and_assignment = { "&=" }
+xor_assignment = { "^=" }
+or_assignment = { "|=" }
+shift_left_assignment = { "<<=" }
+shift_right__assignment = { ">>=" }
+
+// Literals
+numbers = @{
+    base_10
+    | base_16
+    | binary
+    | float
+}
 string = @{ multi_line_string | single_line_string }
+bool = {
+    true
+    | false
+}
+
+// Annotations
+annotation = { "@" ~ annotation_identifier }
+
+// Keywords
+if_keyword = { "if" }
+elif_keyword = { "elif" }
+else_keyword = { "else" }
+for_keyword = { "for" }
+while_keyword = { "while" }
+match_keyword = { "match" }
+break_keyword = { "break" }
+continue_keyword = { "continue" }
+pass_keyword = { "pass" }
+return_keyword = { "return" }
+class_keyword = { "class" }
+class_name_keyword = { "class_name" }
+extends_keyword = { "extends" }
+is_keyword = { "is" }
+in_keyword = { "in" }
+as_keyword = { "as" }
+self_keyword = { "self" }
+signal_keyword = { "signal" }
+func_keyword = { "func" }
+static_keyword = { "static" }
+const_keyword = { "const" }
+enum_keyword = { "enum" }
+var_keyword = { "var" }
+breakpoint_keyword = { "breakpoint" }
+preload_keyword = { "preload" }
+await_keyword = { "await" }
+yield_keyword = { "yield" }
+assert_keyword = { "assert" }
+void_keyword = { "void" }
+PI_keyword = { "PI" }
+TAU_keyword = { "TAU" }
+INF_keyword = { "INF" }
+NAN_keyword = { "NAN" }
+
+true = { "true" }
+false = { "false" }
+
+// Utility
+
 single_line_string = {
     PUSH(single_quotes | double_quotes)
     ~ (!(single_quotes | double_quotes) ~ !newline ~ ANY)*
@@ -43,28 +168,39 @@ multi_line_string = {
     ~POP
 }
 
-// Keywords
-extends_keyword = _{ "extends" }
-class_name_keyword = _{ "class_name" }
+base_10 = { number+ }
+base_16 = { "0x" ~ hexnumber+
+}
+binary = { "0b" ~ bin_number+ }
+float = { number+ ~ dot ~ number+}
 
-// Utility
+square_bracket_open = { "[" }
+square_bracket_close = { "]" }
+curly_bracket_open = { "{" }
+curly_bracket_close = { "}" }
+paren_open = { "(" }
+paren_close = { ")" }
+
 single_quotes = _{ "'" }
 double_quotes = _{ "\"" }
 triple_quotes = _{ "\"\"\"" }
 
-space = _{ " " }
-tab = _{ "\t" }
-
-hash = _{ "#" }
-
-dot = _{ "." }
-coma = _{ "," }
+dot = { "." }
+coma = { "," }
 
 identifier = @{
     (ASCII_ALPHA | "_")
     ~ (ASCII_ALPHANUMERIC | "_")*
 }
 
-newline = _{ "\n" }
-whitespace = _{ ( space | tab )+ }
-COMMENT = { hash ~ !ANY+ ~ newline }
+type_identifier = @{
+    ASCII_ALPHA
+    ~ ASCII_ALPHANUMERIC*
+}
+
+annotation_identifier = { ASCII_ALPHA }
+number = {ASCII_DIGIT|"_"}
+hex_number = {ASCII_HEX_DIGIT}
+bin_number = {ASCII_HEX_DIGIT}
+
+expression_part = (string | numbers | identifier)
